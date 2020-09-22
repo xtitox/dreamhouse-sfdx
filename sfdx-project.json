@@ -6,6 +6,13 @@
             "package": "dreamhouse",
             "versionNumber": "3.0.0.NEXT",
             "versionName": "Winter '19"
+        },
+        {
+            "path": "force-app",
+            "package": "DreamHouse",
+            "versionName": "ver 0.1",
+            "versionNumber": "0.1.0.NEXT",
+            "default": false
         }
     ],
     "namespace": "",
@@ -14,6 +21,7 @@
     "packageAliases": {
         "dreamhouse": "0Ho1I000000XZDVSA4",
         "dreamhouse@2.0.0-4": "04t1I0000036seVQAQ",
-        "dreamhouse@3.0.0-5": "04t1I0000036u98QAA"
+        "dreamhouse@3.0.0-5": "04t1I0000036u98QAA",
+        "DreamHouse": "0Ho4W000000GmfoSAC"
     }
 }
