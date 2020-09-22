@@ -172,10 +172,10 @@
         <apexClass>PushPriceChangeNotificationTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
-    <classAccesses>
+<!--  <classAccesses>
         <apexClass>RejectDuplicateFavoriteTest</apexClass>
         <enabled>true</enabled>
-    </classAccesses>
+    </classAccesses> -->
     <classAccesses>
         <apexClass>SlackOpportunityPublisher</apexClass>
         <enabled>true</enabled>
