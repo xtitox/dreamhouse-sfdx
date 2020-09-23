@@ -2,7 +2,6 @@
     "name": "dreamhouse-project-template",
     "author": "whoami",
     "scripts": {
-        "test:lwc": "lwc-jest",
         "test:scratch": "sfdx force:apex:test:run --codecoverage --resultformat human --wait 10"
     },
     "devDependencies": {
