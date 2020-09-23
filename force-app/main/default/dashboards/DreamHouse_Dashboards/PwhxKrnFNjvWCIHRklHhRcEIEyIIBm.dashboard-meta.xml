@@ -21,6 +21,7 @@
                 <indicatorLowColor>#C23934</indicatorLowColor>
                 <indicatorMiddleColor>#FFB75D</indicatorMiddleColor>
                 <report>DreamHouse_Reports/Properties_by_Broker</report>
+                <showRange>false</showRange>
             </dashboardComponent>
             <rowIndex>0</rowIndex>
             <rowSpan>3</rowSpan>
@@ -115,7 +116,7 @@
     </dashboardGridLayout>
     <dashboardType>SpecifiedUser</dashboardType>
     <isGridLayout>true</isGridLayout>
-    <runningUser>cc@spring18.org</runningUser>
+    <runningUser>test-kxhe8fdfad9w@example.com</runningUser>
     <textColor>#000000</textColor>
     <title>My Dashboard</title>
     <titleColor>#000000</titleColor>

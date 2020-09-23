@@ -3,5 +3,6 @@
     <description>Created by Lightning App Builder</description>
     <flexiPage>Sample_Data_Import</flexiPage>
     <label>Sample Data Import</label>
+    <mobileReady>false</mobileReady>
     <motif>Custom67: Gears</motif>
 </CustomTab>

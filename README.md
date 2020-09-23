@@ -1,148 +1,93 @@
-# DreamHouse Aura Sample Application
+# GitLab CI/CD for Salesforce
 
-> **⚠️ IMPORTANT ⚠️ :** This is the Aura version of the DreamHouse sample application. If you are looking for the new Lightning Web Components version, click [here](https://github.com/dreamhouseapp/dreamhouse-lwc).
+This project contains a fully configured CI pipeline that works with Salesforce DX projects following the [package development model](https://trailhead.salesforce.com/en/content/learn/modules/sfdx_dev_model).
+You can include a copy of, or import, this project's .yml file in your own project.
+For a quick start example, please refer to [sfdx/sfdx-project-template](https://gitlab.com/sfdx/sfdx-project-template).
 
-![dreamhouse-logo](dreamhouse-logo.png)
+# What It Does
 
-[![CircleCI](https://circleci.com/gh/dreamhouseapp/dreamhouse-sfdx.svg?style=svg)](https://circleci.com/gh/dreamhouseapp/dreamhouse-sfdx)
+The CI pipeline for Salesforce is configured to create a scratch org and run tests of your Salesforce app every time you make a commit.
+If tests pass, then the CI pipeline will create a new unlocked package version. You then have the option to manually approve the change
+and deploy the new package version into your sandbox and production environments.
 
-Dreamhouse is a sample application for the real estate business built on the Salesforce platform. It allows brokers to manage their properties and customers to find their dream house.
+![Completed pipeline](images/completed-pipeline.png)
 
-## Table of contents
+There are 6 stages to this pipeline:
 
-* [Installation instructions](#installation-instructions)
-    * [Installing DreamHouse using Salesforce DX](#installing-dreamhouse-using-salesforce-dx)
-    * [Installing DreamHouse using an unlocked package](#installing-dreamhouse-using-an-unlocked-package)
-* [Code highlights](#code-highlights)
-* [Additional resources](#additional-resources)
+1. **Preliminary Testing**: For unit tests that can run in the context of a runner, without deployment to a scratch org. By default, this stage runs [Jest tests](https://developer.salesforce.com/docs/component-library/documentation/lwc/lwc.testing) for [Lightning Web Components](https://trailhead.salesforce.com/en/content/learn/trails/build-lightning-web-components), if they exist.
+2. **Create Scratch Org**: Checks if you are within your daily scratch org limits, then creates a new scratch org and deploys the app metadata to it. Note there is also a "delete scratch org" job which can be run manually to remove and clean up leftover scratch orgs.
+3. **Test Scratch Org**: Runs tests on the scratch org, such as Apex tests. At this point your team can conduct manual testing in the scratch org.
+4. **Package**: Create a new unlocked package version for deployment to sandbox and production orgs. Only runs in the master branch.
+5. **Staging**: Deploy to a pre-production org, such as a sandbox. This is a manual job which must be triggered by pressing the button, and only runs in the master branch.
+6. **Production**: Promote the app and deploy to production. This is a manual job which must be triggered by pressing the button, and only runs in the master branch.
 
-## Installation Instructions
+# Setting Up Your Project
 
-There are two ways to install DreamHouse:
-- Using Salesforce DX
-- Using an unlocked package
+1. Obtain a [Dev Hub](https://trailhead.salesforce.com/content/learn/projects/quick-start-salesforce-dx?trail_id=sfdx_get_started) org, which is required for creating scratch orgs in the CI pipeline. For testing, you can use a free [Trailhead Playground](https://trailhead.salesforce.com/content/learn/modules/trailhead_playground_management?trail_id=learn_salesforce_with_trailhead) or free [Developer Edition](https://developer.salesforce.com/signup) org.
+2. In your Dev Hub org, enable both features [Dev Hub](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_enable_devhub.htm) and [Second-Generation Packaging](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_enable_secondgen_pkg.htm).
+3. [Create](#create-an-unlocked-package) an unlocked package.
+4. [Create](https://docs.gitlab.com/ee/gitlab-basics/create-project.html) a new GitLab project or [import](https://docs.gitlab.com/ee/user/project/import/repo_by_url.html) our quick start [sfdx/sfdx-project-template](https://gitlab.com/sfdx/sfdx-project-template).
+5. [Configure](#configure-environment-variables) CI/CD environment variables in your GitLab project.
+6. [Clone](https://docs.gitlab.com/ee/gitlab-basics/command-line-commands.html) your project locally.
+7. Add your Salesforce DX source to your local GitLab project then commit and push the changes to the `master` branch, which will initiate the CI pipeline.
 
-### Installing DreamHouse using Salesforce DX
-This is the recommended installation option for developers who want to experience the app and the code.
+# Create an Unlocked Package
 
-1. Install Salesforce DX. Enable the Dev Hub in your org or sign up for a Dev Hub trial org and install the Salesforce DX CLI. Follow the instructions in the [Salesforce DX Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm?search_text=trial%20hub%20org) or in the [App Development with Salesforce DX](https://trailhead.salesforce.com/modules/sfdx_app_dev) Trailhead module.
+The package stage of the CI pipeline will automatically create new package versions. You can manually click a button in the pipeline to install the packages into downstream Salesforce environments. Before running the pipeline, you need to have created the package definition and update your `sfdx-project.json` file to reference it.
 
-1. Clone the **dreamhouse-sfdx** repository:
+1. From your project directory, [create an unlocked package](https://trailhead.salesforce.com/en/content/learn/projects/quick-start-unlocked-packages) using the [sfdx force:project:create](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_dev2gp_create_pkg.htm) command. You only need to do this once per package/project.
+
+2. Ensure your `sfdx-project.json` file mentions the package name and initial version number scheme in the `packageDirectories` property, and that the package name and ID (0Ho) are defined in the `packageAliases` property.
+
+    An example `sfdx-project.json` file:
+    ```json
+    {
+        "packageDirectories": [
+            {
+                "path": "force-app",
+                "default": true,
+                "package": "YOUR_PACKAGE_NAME",
+                "versionNumber": "1.0.0.NEXT"
+            }
+        ],
+        "namespace": "",
+        "sourceApiVersion": "46.0",
+        "packageAliases": {
+            "YOUR_PACKAGE_NAME": "0HoXXXXXXXXXXXXXXX"
+        }
+    }
     ```
-    git clone https://github.com/dreamhouseapp/dreamhouse-sfdx
-    cd dreamhouse-sfdx
-    ```
 
-1. Create a scratch org and provide it with an alias of your choice (**dh** in the command below):
-    ```
-    sfdx force:org:create -s -f config/project-scratch-def.json -a dh
-    ```
+Once set, you don't have to manage the `versionNumber` property in `sfdx-project.json`. The CI pipeline determines the next appropriate version number automatically. Once a package version number has been released, the CI pipeline will create new package versions with a minor version number one greater than the latest released version.
 
-1. Push the app to your scratch org:
-    ```
-    sfdx force:source:push
-    ```
+For example, if the latest released version number is 1.2.0.5, then the next time the CI pipeline creates a new package version then it'll automatically compute the new version number to be 1.3.0.1.
 
-1. Assign the **dreamhouse** permission set to the default user:
-    ```
-    sfdx force:user:permset:assign -n dreamhouse
-    ```
+# Configure Environment Variables
 
-1. Open the scratch org:
-    ```
-    sfdx force:org:open
-    ```
+To use GitLab CI, you need to authenticate the GitLab project to your orgs in Salesforce.
 
-1. Select **DreamHouse** in the App Launcher
+1. Install [Salesforce CLI](https://developer.salesforce.com/tools/sfdxcli) on your local machine.
+2. [Authenticate using the web-based oauth flow](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_web_flow.htm) to each of the orgs that represent your Dev Hub, sandbox, and production org. **Note, for initial testing of GitLab CI, your "sandbox" and "production" orgs can be Trailhead Playgrounds or any Developer Edition org.**
+3. Use the `sfdx force:org:display --targetusername <username> --verbose` command to get the [Sfdx Auth Url](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_view_info.htm) for your various orgs. The URL you're looking for starts with `force://`. **Note, you must use the `--verbose` argument to see the Sfdx Auth URL.**
+4. Populate the variables under **Settings > CI / CD > Variables** in your project in GitLab.
 
-1. Click the **Data Import** tab and click **Initialize Sample Data**
+![Enter CI/CD variables](images/cicd-variables.png)
 
-### Installing DreamHouse using an unlocked package
-This is the recommended option for non developers. Use this option if you want to experience the sample app but do not plan to modify the code.
+Here are the Auth URL variables to set:
 
-1. [Sign up](https://developer.salesforce.com/signup) for a developer edition.
+- `DEVHUB_AUTH_URL`
+- `SANDBOX_AUTH_URL`
+- `PRODUCTION_AUTH_URL` (if your prod org is the same as your Dev Hub, then this can ommitted and the DEVHUB_AUTH_URL will be used by default)
 
-1. Enable My Domain. Follow the instructions to enable My Domain [here](https://trailhead.salesforce.com/modules/identity_login/units/identity_login_my_domain).
+Here are some other variables that are optional:
 
-1. Click [this link](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1I0000036u98QAA) to install the DreamHouse unlocked package into your developer edition org.
+- `DEPLOY_SCRATCH_ON_EVERY_COMMIT`: "true" to deploy a scratch org on every commit in a merge request, otherwise it won't.
+- `PACKAGE_NAME`: Optional. Must match one of the `packageDirectories` entries in `sfdx-project.json`. If not present, then the CI pipeline uses the default package directory from `sfdx-project.json`.
+- `SALESFORCE_DEPLOYMENT_APPROACH` : Optional variable. The default value is assumed to be `PACKAGING`. Pipelines without this variable set or set to `PACKAGING` explicitly will execute creating a versioned unlocked package and deploying it into salesforce orgs. If you would like to only push application meta-data in the `/force-app` directory and not create an unlocked package, then set the value of this variable to `ORG_BASED`.  
 
-1. Select **Install for All Users**. When prompted, make sure you grant access to the external sites (api.lifx.com, dreamhouzz-push-server.herokuapp.com, and hooks.slack.com).
+Optionally, disable entire jobs with the following boolean variables:
 
-1. Select **DreamHouse** in the App Launcher.
-
-1. Click the **Data Import** tab and click **Initialize Sample Data**.
-
-## Code highlights
-
-### Lightning components
-DreamHouse features a large number of Lightning Components to enhance the user experience. Lightning Components are used on the Property record page, on an app pages (**Property Finder** and **Property Explorer**), in the utility bar, and as quick actions.
-
-Installing a Lightning component as a **quick action** can be a great alternative to adding the component directly to the page layout because the component instantiation is deferred until the action button is clicked (lazy instantiation). Installing less frequently used components as quick or global actions can contribute to a faster page loading time, and a streamlined user interface. In DreamHouse, the [SmartHome](force-app/main/default/aura/SmartHome) component is installed as a quick action on the Property record page.
-
-The **utility bar** is a great place to host components you always want at your fingertips. [MortgageCalculator](force-app/main/default/aura/MortgageCalculator) is a great example.
-
-### Base Lightning components
-Base Lightning Components are a set of powerful UI components available in the Lightning Component Framework. The DreamHouse custom components use many Base Lightning Components as building blocks. For example, **lightning:card**, **lightning:button**, and **lightning:layout** are used throughout the application. [PropertyCarousel](force-app/main/default/aura/PropertyCarousel/PropertyCarousel.cmp), which allows you to navigate through the pictures of a property and upload new pictures, is built using **lightning:carousel** and **lightning:fileUpload**. [PropertySummary](force-app/main/default/aura/PropertySummary/PropertySummary.cmp) leverages **lightning:formattedAddress** and **lightning:formattedNumber**.
-
-### Lightning Data Service
-Lightning Data Service allows you to manipulate (retrieve, create, update, delete) Salesforce records without writing server-side code (Apex). In DreamHouse, all the Lightning components that work with a single Property record use Lightning Data Service. Check out [PropertySummary](force-app/main/default/aura/PropertySummary) for an example.
-
-### Third-Party JavaScript libraries
-You can use third-party JavaScript libraries in Lightning Components using **ltng:require**. For example:
-- [Map](force-app/main/default/aura/Map) and [PropertyListMap](force-app/main/default/aura/PropertyListMap) use the [Leaflet](https://leafletjs.com/) library.
-- [PriceRange](force-app/main/default/aura/PropertyListMap) uses the [nouislider](https://refreshless.com/nouislider/) library for its double slider.
-
-### Standard application events
-Standard application events are available by default in the framework and are used to trigger high level actions. For example, in [PropertySummary](force-app/main/default/aura/PropertySummary/PropertySummaryController.js), **force:navigateToSObject** is used to navigate to the broker record page, and **force:editRecord** is used to edit a record in place.
-
-### Custom application events
-Custom application events are used for communication between components in App Builder. For example, the [PropertyFilterChange](force-app/main/default/aura/PropertyFilterChange) event is fired in the [PropertyFilter](force-app/main/default/aura/PropertyFilter) component to notify other components that new filtering criteria have been selected.
-
-### Component events
-Component events are used for finer-grained communication between components. For example, the [PropertyPaginator](force-app/main/default/aura/PropertyPaginator) component fires the **pageNext** and **pagePrevious** events to notify its parent ([PropetyTileList](force-app/main/default/aura/PropertyTileList)) that the user requested the next or previous page.
-
-### Custom page templates
-Custom page templates allow you to create ad hoc page layouts that admins can use in App Builder to create new pages. Custom page templates are implemented as Lightning Components. There are two custom page templates in Dreamhouse: [PageTemplate_2_6_4](force-app/main/default/aura/PageTemplate_2_6_4/PageTemplate_2_6_4.cmp) (used by the **Property Finder** page) and [PageTemplate_2_7_3](force-app/main/default/aura/PageTemplate_2_7_3/PageTemplate_2_7_3.cmp) (used by the **Property Explorer** page). They provide custom three column layouts using different relative widths for each column.
-
-### Reports and dashboards
-Reports and dashboards are easy to create and look great in Lightning. Just to get things started, the DreamHouse app includes a few reports in the **DreamHouse Reports** folder (**Days on Market**, **Properties by Broker**, and **Portfolio Health**), and a dashboard in the **DreamHouse Dashboard** folder (**My Dashboard**).
-
-### Einstein Vision
-The [VisualSearchBox](force-app/main/default/aura/VisualSearchBox) component leverages Einstein Vision to provide a visual search feature that allows you to find houses based on the picture of a house you like. Just select or drag a picture in the Visual search area of the property filters: Einstein Vision will recognize the type of house (colonial, victorian, or contemporary) and you will be presented with a list of houses matching that category. Follow the instructions below to enable visual search in the **Property Finder** and **Property Explorer** pages:
-
-1. Get an **Einstein Platform Services** account. Follow the instructions [here](https://trailhead.salesforce.com/projects/predictive_vision_apex/steps/predictive_vision_apex_prep).
-
-1. In Salesforce, click the **Files** tab and upload **einstein_platform.pem**.
-
-1. In **Setup**, type **Custom** in the Quick Find box and click the **Custom Settings** link.
-
-1. Click the first **New** Button (at the top of the screen).
-
-1. For **Einstein Vision Email**, specify the email address you used when you created your Einstein Platform Services account (step 1), and click **Save**.
-
-1. In the DreamHouse app, click the **Einstein Vision** tab.
-
-1. Click the **Create Dataset** button.
-
-1. In the **houses** tile, click the **Train** button, the click the **Models** tab.
-
-1. Click the **Refresh Models** button until the Progress column indicates **100%**.
-
-1. Copy the **Model Id** in your clipboard.
-
-1. Click the **Property Finder** Tab, click the gear icon (upper right corner), and click **Edit Page**. Click the **Filters** component and paste the Model Id in the **Einstein Model Id** field in the right sidebar. Save the page.
-
-1. Repeat the last step for the **Property Explorer** page.
-
-You can now search houses by uploading (or dropping) a picture in the visual search box that is part of the Filters component on the **Property Finder** and **Property Explorer** pages.
-
-## Additional resources
-DreamHouse has many more features not discussed here. For example, DreamHouse also demonstrates how to:
-
-- Use the Salesforce Mobile App
-- Create a customer engagement mobile app with the Mobile SDK
-- Automate processes with Process Builder, including sending push notification messages to the customer engagement app
-- Integrate with Alexa, Slack, and Facebook Messenger
-- Integrate with IoT devices like smart lights, smart thermostats, and smart locks
-
-Head over to [dreamhouseapp.io](http://dreamhouseapp.io) to learn more.
+- `TEST_DISABLED`
+- `SCRATCH_DISABLED`
+- `SANDBOX_DISABLED`
+- `PRODUCTION_DISABLED`

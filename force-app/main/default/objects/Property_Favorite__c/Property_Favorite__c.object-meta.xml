@@ -45,14 +45,14 @@
     <deploymentStatus>Deployed</deploymentStatus>
     <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
-    <enableChangeDataCapture>false</enableChangeDataCapture>
     <enableFeeds>false</enableFeeds>
     <enableHistory>false</enableHistory>
+    <enableLicensing>false</enableLicensing>
     <enableReports>false</enableReports>
     <enableSearch>true</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
-    <!--externalSharingModel>ReadWrite</externalSharingModel-->
+    <externalSharingModel>Private</externalSharingModel>
     <label>Property Favorite</label>
     <nameField>
         <displayFormat>F-{00000000}</displayFormat>

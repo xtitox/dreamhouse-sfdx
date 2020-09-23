@@ -19,6 +19,9 @@
             </componentInstanceProperties>
             <componentName>PropertyTileList</componentName>
         </componentInstances>
+        <componentInstances>
+            <componentName>PropertyListMap</componentName>
+        </componentInstances>
         <name>center</name>
         <type>Region</type>
     </flexiPageRegions>
