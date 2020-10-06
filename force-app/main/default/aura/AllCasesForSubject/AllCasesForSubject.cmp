@@ -1,0 +1,74 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" access="global" controller="SOQL_Cases">
+	  
+ <aura:attribute name="allCases" type="List"/>
+ <aura:attribute name="recordId" type="String"/>
+ <aura:attribute name="accountName" type="String"/>
+ <aura:attribute name="totalitem" type="Integer"/>
+ <aura:attribute name="totalCases" type="Integer"/>
+ 
+ <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+ <div class="slds-form slds-form_compound slds-background-shape bodyScroll" style="background: #FFF !important;
+                                                                                      padding: 1rem !important;
+                                                                                      border-radius: .25rem !important; height:335px; overflow:scroll; overflow-x: hidden;">
+   
+   <div class="headerTitle">    
+      <lightning:icon class="slds-p-left_none" iconName="standard:contact" size="small" title="Casos por Asunto"/>          
+      <span class="title-Text" title="Cuenta Personal">&nbsp;&nbsp;&nbsp;Cuenta Personal: {!v.accountName}</span>
+   </div>
+   <br/>  
+   <div class="headerTitle">    
+      <lightning:icon class="slds-p-left_none" iconName="standard:case" size="small" title="Casos por Asunto"/>          
+      <span class="title-Text" title="Todos los Casos por Asunto">&nbsp;&nbsp;&nbsp;Todos los Casos por Asunto ({!v.totalCases})</span>
+   </div> 
+   <br/>  
+   <table class="slds-table slds-table--bordered">
+    <thead>
+        <tr class="slds-line-height_reset">
+         <th scope="col">
+          <div class="slds-truncate" title="Número de Caso">Caso</div>
+         </th>
+         <th scope="col">
+          <div class="slds-truncate" title="Estado">Estado</div>
+         </th>
+         <th scope="col">
+          <div class="slds-truncate" title="Fecha en que se abrió el Caso">Apertura</div>
+         </th>
+         <th scope="col">
+          <div class="slds-truncate" title="Asunto o Tema">Asunto</div>
+         </th>
+        </tr>
+    </thead>
+    <tbody>
+     <aura:iteration items="{!v.allCases}" var="ccase">    
+        <tr>
+           <td>
+               <p><a data-caseid="{!ccase.Id}" onclick="{!c.handleClick}" >{!ccase.CaseNumber}</a></p>
+              <!--<span class="styleCase">{!ccase.CaseNumber}</span>-->
+           </td>
+           <td>
+              <span class="normal-Text">{!ccase.Status}</span>
+           </td> 
+           <td>
+              <span class="normal-Text">
+               <lightning:formattedDateTime aura:id="dt"
+                                     value="{!ccase.CreatedDate}"
+                                     month="2-digit"
+                                     day="2-digit"
+                                     year="numeric"
+                                     hour="2-digit"
+                                     minute="2-digit"
+                                     hour12="true"
+                                     timeZone="{!$Locale.timezone}"/>
+              
+              </span>
+           </td>
+           <td>
+              <span class="normal-Text">{!ccase.Subject}</span>
+           </td> 
+        </tr>
+     </aura:iteration>    
+    </tbody> 
+   </table>     
+ </div>    
+</aura:component>
