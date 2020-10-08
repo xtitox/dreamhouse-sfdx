@@ -1,0 +1,22 @@
+FROM node:lts
+ENV DEBIAN_FRONTEND noninteractive
+RUN groupadd -g 999 sfdx \
+&& useradd --uid 999 --gid sfdx --shell /bin/bash --create-home sfdx \
+&& apt-get update && apt-get install -y wget git xz-utils vim-common build-essential gcc \
+&& wget https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz -O ./sfdx.tar.xz \
+&& mkdir ./sfdx && tar -xvJf ./sfdx.tar.xz -C ./sfdx --strip-components 1 \
+&& ./sfdx/install && chmod -R og+w /usr/local/lib/node_modules && chmod -R og+w /usr/local/bin
+USER sfdx
+WORKDIR /home/sfdx
+RUN npm install @salesforce/lwc-jest --save-dev \
+&& npm install @salesforce/eslint-config-lwc \
+&& npm install deasync \
+&& npm install kleur \
+&& npm install browserslist \
+&& npm install -g eslint \
+&& npm install -g prettier \
+&& npm install eslint babel-eslint @lwc/eslint-plugin-lwc -g \
+&& npm install eslint @salesforce/eslint-config-lwc -g \
+&& npm install eslint @salesforce/lwc-jest -g \
+&& npm install eslint-plugin-import -g \
+&& npm install eslint-plugin-jest -g
